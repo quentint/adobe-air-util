@@ -2,12 +2,9 @@
 #labels Featured,Phase-Implementation,Phase-Deploy
 
 = Introduction =
-These classes have to be stored in this package: net.tw.util.air
-
-Documentation coming soon...
+ * These classes have to be stored in this package: net.tw.util.air
+ * Documentation coming soon...
 
 = Details =
-
-First introduced here: http://toki-woki.net/blog/?p=157
-
-Contributors welcome!
+ * Contributors welcome!
+ * First introduced here: http://toki-woki.net/blog/?p=157
