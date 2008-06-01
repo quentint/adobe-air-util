@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow showCloseButton="true" close="onCancel()" xmlns:mx="http://www.adobe.com/2006/mxml"
+	title="flickr Uploader" creationComplete="onCC();"
+	paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"
+	width="450">
+	<mx:states>
+		<mx:State name="pageView">
+			<mx:SetProperty target="{pageBlock}" name="visible" value="true"/>
+			<mx:SetProperty target="{pageBlock}" name="includeInLayout" value="true"/>
+			<mx:SetProperty target="{pb}" name="visible" value="false"/>
+			<mx:SetProperty target="{pb}" name="includeInLayout" value="false"/>
+		</mx:State>
+		<mx:State name="uploaderView">
+			<mx:SetProperty target="{uploaderBlock}" name="includeInLayout" value="true"/>
+			<mx:SetProperty target="{uploaderBlock}" name="visible" value="true"/>
+			<mx:SetProperty target="{pb}" name="includeInLayout" value="false"/>
+			<mx:SetProperty target="{pb}" name="visible" value="false"/>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.events.CloseEvent;
+			import mx.containers.TitleWindow;
+			import mx.managers.PopUpManager;
+			import mx.controls.HTML;
+			import com.adobe.webapis.flickr.AuthResult;
+			import com.adobe.webapis.flickr.AuthPerm;
+			import com.adobe.webapis.flickr.events.FlickrResultEvent;
+			import com.adobe.webapis.flickr.FlickrService;
+			import net.tw.util.air.flickr.FlickrUploadBox;
+			//
+			public var autoExpandUploadBox:Boolean=false;
+			//
+			private var _key:String;
+			private var _secret:String;
+			private var _service:FlickrService;
+			private var _frob:String;
+			private var _available:Boolean=false;
+			private var _authURL:String;
+			private static var _tokenCookieName:String="flickrUploaderToken";
+			private var _tokenCookie:SharedObject;
+			//
+			private function onCC():void {
+				addEventListener(Event.CONNECT, onConnect);
+				addEventListener(Event.ADDED_TO_STAGE, onAdd);
+				page.addEventListener(Event.COMPLETE, onPageComplete);
+				if (_key && _secret) init();
+			}
+			private function onAdd(e:Event):void {
+				if (_key && _secret) init();
+			}
+			public function setKeyPair(key:String, secret:String):void {
+				_key=key;
+				_secret=secret;
+			}
+			public function init():void {
+				if (_available) {
+					// Si on est déjà connecté, on peut directement aller à la page des uploaders
+					currentState='uploaderView';
+					return;
+				} else if (_frob) {
+					// On n'est pas connecté mais on a un frob, on affiche la page Web
+					currentState='pageView';
+					page.location=_authURL;
+					return;
+				}
+				currentState=null;
+				//
+				_service = new FlickrService(_key);
+				_service.secret = _secret;
+				//
+				_service.addEventListener(FlickrResultEvent.AUTH_GET_TOKEN, getTokenResponse);
+				_service.addEventListener(FlickrResultEvent.AUTH_CHECK_TOKEN, checkTokenResponse);
+				_service.addEventListener( FlickrResultEvent.AUTH_GET_FROB, getFrobResponse);
+				//
+				_tokenCookie = SharedObject.getLocal(_tokenCookieName);
+				//_tokenCookie.data.auth_token=null;
+				//
+				if (_tokenCookie.data.auth_token) _service.auth.checkToken(_tokenCookie.data.auth_token);
+				else _service.auth.getFrob();
+			}
+			public function getService():FlickrService {
+				return _service;
+			}
+			public function addUpload(f:FileReference):void {
+				var ub:FlickrUploadBox=new FlickrUploadBox();
+				if (autoExpandUploadBox) ub.showDetails(true);
+				//
+				ub.addEventListener(Event.CANCEL, onUploadBoxEvent);
+				ub.addEventListener(Event.COMPLETE, onUploadBoxEvent);
+				ub.setFile(f, _service);
+				//
+				boxHolder.addChild(ub);
+				updateCancelVis();
+			}
+			private function checkTokenResponse(event:FlickrResultEvent):void {
+				if (event.success) getTokenResponse(event);
+				else _tokenCookie.clear();
+			}
+			private function getFrobResponse(event:FlickrResultEvent):void {
+				if (event.success) {
+					// On a chopé un frob...
+					_frob=event.data.frob;
+					// On chope l'URL pour valider l'accès au compte du client
+					_authURL = _service.getLoginURL(_frob, AuthPerm.WRITE);
+					page.location=_authURL;
+				}
+			}
+			private function onPageComplete(e:Event):void {
+				if (page.location.replace(/^http:\/\/www/, 'http://api')==_authURL || page.location=="http://www.flickr.com/services/auth/") {
+					// Si on est resté sur la même page, on re-tchek un ticket
+					getTokenViaFrob();
+					return;
+				}
+				showPage();
+			}
+			private function getTokenViaFrob(event:*=null):void {
+				_service.auth.getToken(_frob);
+			}
+			private function getTokenResponse(event:FlickrResultEvent):void {
+				if (event.success) {
+					// On a un token tout frais, on propose à la personne de choper une image
+					_available=true;
+					var authResult:AuthResult = AuthResult(event.data.auth);
+					// On le stocke dans le service qui va en avoir besoin...
+					_service.token = authResult.token;
+					_service.permission = authResult.perms;
+					// On le stocke dans le cookie
+					_tokenCookie.data.auth_token = _service.token;
+					_tokenCookie.flush();
+					dispatchEvent(new Event(Event.CONNECT));
+				} else {
+					showPage();
+				}
+			}
+			private function onConnect(e:Event):void {
+				currentState='uploaderView';
+			}
+			private function showPage():void {
+				currentState='pageView';
+			}
+			private function onUploadBoxEvent(e:Event):void {
+				if (boxHolder.numChildren==0) {
+					parent.removeChild(this);
+					dispatchEvent(new Event(Event.COMPLETE));
+				}
+				updateCancelVis();
+			}
+			private function onCancel():void {
+				boxHolder.removeAllChildren();
+				parent.removeChild(this);
+				dispatchEvent(new Event(Event.CANCEL));
+			}
+			private function updateCancelVis():void {
+				cancel.visible=cancel.includeInLayout=boxHolder.numChildren>1;
+			}
+		]]>
+	</mx:Script>
+	<mx:ProgressBar width="100%" id="pb" label="Authenticating..." indeterminate="true" labelPlacement="center"/>
+	<mx:VBox width="100%" horizontalAlign="right" id="pageBlock" visible="false" includeInLayout="false">
+		<mx:HTML id="page" width="100%" height="350"/>
+		<mx:Button label="Cancel" click="onCancel()" id="button1"/>
+	</mx:VBox>
+	<mx:VBox width="100%" horizontalAlign="right" id="uploaderBlock" includeInLayout="false" visible="false">
+		<mx:VBox height="250" width="100%" id="boxHolder"></mx:VBox>
+		<mx:Button click="onCancel();" id="cancel" label="Cancel all"/>
+	</mx:VBox>
+</mx:TitleWindow>
