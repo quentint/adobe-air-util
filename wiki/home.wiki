@@ -3,6 +3,7 @@
 
 = Introduction =
  * These classes have to be stored in this package: net.tw.util.air
+ * The downloads are nice, but the sources are better!
  * Documentation coming soon...
 
 = Details =
