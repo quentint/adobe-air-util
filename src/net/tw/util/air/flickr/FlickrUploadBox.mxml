@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCC();" width="100%" paddingRight="10" removedEffect="{re}" verticalScrollPolicy="off">
+	<mx:Resize id="re" heightTo="0" />
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.webapis.flickr.SafetyLevel;
+			import com.adobe.webapis.flickr.ContentType;
+			import com.adobe.webapis.flickr.FlickrService;
+			//
+			private var _fr:FileReference;
+			private var _fs:FlickrService;
+			private var _detailsShown:Boolean=false;
+			//
+			public function setFile(fr:FileReference, fs:FlickrService):void {
+				_fr=fr;
+				_fs=fs;
+				fr.addEventListener(Event.COMPLETE, onUploadComplete);
+			}
+			private function onCC():void {
+				showDetails(_detailsShown);
+				if (!_fr) return;
+				tiTitle.text=_fr.name.replace(/\.\w+$/, "");
+			}
+			private function goSubmit():void {
+				if (!_fs || !_fr) return;
+				hb.visible=hb.includeInLayout=false;
+				pb.visible=pb.includeInLayout=true;
+				pb.indeterminate=true;
+				_fs.upload.upload(_fr, tiTitle.text, taDescr.text, tiTags.text, rbPublic.selected, cbFriends.selected, cbFamily.selected);
+			}
+			private function onUploadComplete(e:Event):void {
+				parent.removeChild(this);
+				dispatchEvent(new Event(Event.COMPLETE));
+			}
+			private function goCancel():void {
+				parent.removeChild(this);
+				dispatchEvent(new Event(Event.CANCEL));
+			}
+			public function showDetails(b:Boolean):void {
+				_detailsShown=b;
+				if (!moreFields) return;
+				moreFields.visible=moreFields.includeInLayout=b;
+				moreButton.toolTip=b ? "Hide some fields" : "Show more fields";
+				moreButton.label=b ? "-" : "+";
+			}
+		]]>
+	</mx:Script>
+	<mx:Label text="Title" width="100%" fontWeight="bold"/>
+	<mx:HBox width="100%">
+		<mx:TextInput id="tiTitle" width="100%"/>
+		<mx:Button label="+" id="moreButton" click="{showDetails(!_detailsShown)}" />
+	</mx:HBox>
+	<mx:VBox width="100%" id="moreFields">
+		<mx:Label text="Description" width="100%" fontWeight="bold"/>
+		<mx:TextArea id="taDescr" width="100%" styleName="uploadBoxTA"/>
+		<mx:Label text="Tags (comma-separated)" width="100%" fontWeight="bold"/>
+		<mx:TextInput id="tiTags" width="100%"/>
+		<mx:RadioButton label="Private" id="rbPrivate"/>
+		<mx:CheckBox label="Visible by friends" enabled="{rbPrivate.selected}" id="cbFriends" paddingLeft="20"/>
+		<mx:CheckBox label="Visible by family" enabled="{rbPrivate.selected}" id="cbFamily" paddingLeft="20"/>
+		<mx:RadioButton label="Public" id="rbPublic" selected="true"/>
+	</mx:VBox>
+	<mx:HBox id="hb" width="100%" horizontalAlign="right">
+		<mx:Button label="Submit" id="submit" click="goSubmit();" width="50%"/>
+		<mx:Button label="Cancel" id="cancel" click="goCancel();" width="50%" styleName="warning"/>
+	</mx:HBox>
+	<mx:ProgressBar id="pb" label="Uploading..." width="100%" visible="false" includeInLayout="false" labelPlacement="center"/>
+	<mx:HRule width="100%"/>
+	
+</mx:VBox>
