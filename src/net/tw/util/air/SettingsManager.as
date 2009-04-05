@@ -13,11 +13,18 @@ package net.tw.util.air {
 		public var autoStoreOnExit:Boolean=true;
 		//
 		public function SettingsManager(name:String="settings", a:Array=null) {
+			itemName=name;
 			objects=[];
 			vars=[];
-			itemName=name;
+			restoreVars();
 			if (a!=null) for each (var o:Object in a) manage(o);
 			NativeApplication.nativeApplication.addEventListener(Event.EXITING, onExit);
+		}
+		protected function restoreVars():void {
+			var prefs:Object=getPrefs();
+			for (var a:String in prefs) {
+				storeVar(a, prefs[a]);
+			}
 		}
 		private function onExit(e:Event):void {
 			dispatchEvent(new Event("store"));
@@ -70,6 +77,9 @@ package net.tw.util.air {
 						case 'mx.controls::TextArea':
 						case 'mx.controls::TextInput':
 							prop='text';
+							break;
+						case 'mx.controls::ComboBox':
+							prop='selectedIndex';
 							break;
 						default:
 							trace(className, 'not managed!');
