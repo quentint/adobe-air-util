@@ -16,14 +16,16 @@ package net.tw.util.air {
 			itemName=name;
 			objects=[];
 			vars=[];
-			restoreVars();
 			if (a!=null) for each (var o:Object in a) manage(o);
+			restoreVars();
 			NativeApplication.nativeApplication.addEventListener(Event.EXITING, onExit);
 		}
 		protected function restoreVars():void {
 			var prefs:Object=getPrefs();
 			for (var a:String in prefs) {
-				storeVar(a, prefs[a]);
+				if (!objects.some(function(element:*, index:int, arr:Array):Boolean {return element.target.id==a})) {
+					storeVar(a, prefs[a]);
+				}
 			}
 		}
 		private function onExit(e:Event):void {
@@ -58,6 +60,7 @@ package net.tw.util.air {
 			return prefs[uniqueIdentifier] ? prefs[uniqueIdentifier] : null;
 		}
 		public function store():void {
+			EncryptedLocalStore.removeItem(itemName);
 			var prefs:Object=new Object();
 			for each (var o:Object in objects) {
 				var tg:Object=o.target;
@@ -105,7 +108,9 @@ package net.tw.util.air {
 				var object:Object=o.target;
 				if (prefs[object.id]) {
 					var props:Object=prefs[object.id];
-					for (var p:String in props) object[p]=props[p];
+					for (var p:String in props) {
+						object[p]=props[p];
+					}
 				}
 			}
 		}
