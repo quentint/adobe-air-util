@@ -96,7 +96,7 @@ package net.tw.util.air {
 			pw.width=ph.width;
 			pw.height=ph.height;
 		}
-		public function placeOverlay(e:Event=null):void {
+		public function updateOverlay(e:Event=null):void {
 			lastPlacingEvent=e;
 			needsPlacing=true;
 		}
