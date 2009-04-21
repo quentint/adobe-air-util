@@ -3,7 +3,7 @@ package net.tw.util.air {
 	import flash.display.Screen;
 	import flash.events.Event;
 	import flash.system.Capabilities;
-	//
+	
 	import mx.core.IWindow;
 	import mx.core.Window;
 	//
@@ -32,6 +32,9 @@ package net.tw.util.air {
 		}
 		public static function runningOnLinux():Boolean {
 			return Capabilities.os.indexOf("Linux")==0;
+		}
+		public static function fixLoadURL(fileURL:String):String {
+			return ((App.runningOnLinux() || App.runningOnMac()) && fileURL.substr(0, 7)!='file://') ? 'file://'+fileURL : fileURL;
 		}
 		//
 		public static function centerWindow(w:IWindow):void {
