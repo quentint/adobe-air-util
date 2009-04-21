@@ -5,7 +5,9 @@ package net.tw.util.air {
 	import flash.geom.*;
 	import flash.html.*;
 	import flash.utils.*;
+	
 	import mx.core.*;
+	import mx.events.ResizeEvent;
 	//
 	public class HTMLOverlay extends EventDispatcher {
 		protected var ph:DisplayObject;
@@ -33,6 +35,7 @@ package net.tw.util.air {
 			phnw=ph.stage.nativeWindow;
 			phnw.addEventListener(NativeWindowBoundsEvent.MOVE, updateOverlay);
 			phnw.addEventListener(NativeWindowBoundsEvent.RESIZE, updateOverlay);
+			ph.addEventListener(ResizeEvent.RESIZE, updateOverlay);
 			phnw.addEventListener(Event.ACTIVATE, updateOverlay);
 			phnw.addEventListener(Event.DEACTIVATE, hideOverlay);
 			phnw.addEventListener(Event.CLOSING, beforeClose);
@@ -80,9 +83,12 @@ package net.tw.util.air {
 		protected function getPlaceholderGlobalPoint():Point {
 			return ph.localToGlobal(new Point(0, 0));
 		}
+		public function updateOverlay(e:Event=null):void {
+			lastPlacingEvent=e;
+			needsPlacing=true;
+		}
 		public function updateOverlayIfNeeded(e:Event=null):void {
 			if (!needsPlacing) return;
-			//
 			refreshOverlayPosition();
 			refreshOverlaySize();
 			if (lastPlacingEvent && lastPlacingEvent.type==Event.ACTIVATE && !pw.visible) showOverlay();
@@ -96,10 +102,7 @@ package net.tw.util.air {
 			pw.width=ph.width;
 			pw.height=ph.height;
 		}
-		public function updateOverlay(e:Event=null):void {
-			lastPlacingEvent=e;
-			needsPlacing=true;
-		}
+		//
 		public function hideOverlay(e:Event=null):void {
 			needsHiding=true;
 			setTimeout(hideOverlayIfNeeded, 10);
