@@ -19,7 +19,7 @@ package net.tw.util.air {
 		protected var pw:NativeWindow;
 		//
 		protected var lastPlacingEvent:Event;
-		public var needsPlacing:Boolean=true;
+		protected var needsPlacing:Boolean=true;
 		protected var needsHiding:Boolean=false;
 		//
 		public function HTMLOverlay(placeHolder:UIComponent, scrollBarsVisible:Boolean=true) {
