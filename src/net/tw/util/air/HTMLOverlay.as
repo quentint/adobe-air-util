@@ -31,9 +31,9 @@ package net.tw.util.air {
 			ph.removeEventListener(Event.ADDED_TO_STAGE, setupListeners);
 			//
 			phnw=ph.stage.nativeWindow;
-			phnw.addEventListener(NativeWindowBoundsEvent.MOVE, placeOverlay);
-			phnw.addEventListener(NativeWindowBoundsEvent.RESIZE, placeOverlay);
-			phnw.addEventListener(Event.ACTIVATE, placeOverlay);
+			phnw.addEventListener(NativeWindowBoundsEvent.MOVE, updateOverlay);
+			phnw.addEventListener(NativeWindowBoundsEvent.RESIZE, updateOverlay);
+			phnw.addEventListener(Event.ACTIVATE, updateOverlay);
 			phnw.addEventListener(Event.DEACTIVATE, hideOverlay);
 			phnw.addEventListener(Event.CLOSING, beforeClose);
 			phnw.addEventListener(NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGING, onDSChange);
