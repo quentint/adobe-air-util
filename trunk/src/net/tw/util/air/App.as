@@ -1,11 +1,11 @@
 package net.tw.util.air {
 	import flash.desktop.NativeApplication;
+	import flash.display.NativeWindow;
 	import flash.display.Screen;
 	import flash.events.Event;
 	import flash.system.Capabilities;
 	
 	import mx.core.IWindow;
-	import mx.core.Window;
 	//
 	public class App {
 		public function App() {}
@@ -41,11 +41,11 @@ package net.tw.util.air {
 			w.nativeWindow.x=(Screen.mainScreen.bounds.width-w.nativeWindow.width)/2;
 			w.nativeWindow.y=(Screen.mainScreen.bounds.height-w.nativeWindow.height)/2;
 		}
-		public static function preventClose(w:Window, activateOnHide:IWindow=null):void {
-			w.nativeWindow.addEventListener(Event.CLOSING, function(e:Event):void {
+		public static function preventClose(w:NativeWindow, activateOnHide:NativeWindow=null):void {
+			w.addEventListener(Event.CLOSING, function(e:Event):void {
 				e.preventDefault();
 				w.visible=false;
-				if (activateOnHide) activateOnHide.nativeWindow.activate();
+				if (activateOnHide) activateOnHide.activate();
 			});
 		}
 	}
