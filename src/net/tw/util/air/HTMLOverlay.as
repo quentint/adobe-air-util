@@ -5,7 +5,6 @@ package net.tw.util.air {
 	import flash.geom.*;
 	import flash.html.*;
 	import flash.utils.*;
-	
 	import mx.core.*;
 	import mx.events.ResizeEvent;
 	//
@@ -30,7 +29,7 @@ package net.tw.util.air {
 			else ph.addEventListener(Event.ADDED_TO_STAGE, setupListeners);
 		}
 		protected function setupListeners(e:Event=null):void {
-			ph.removeEventListener(Event.ADDED_TO_STAGE, setupListeners);
+			if (e) ph.removeEventListener(Event.ADDED_TO_STAGE, setupListeners);
 			//
 			phnw=ph.stage.nativeWindow;
 			phnw.addEventListener(NativeWindowBoundsEvent.MOVE, updateOverlay);
