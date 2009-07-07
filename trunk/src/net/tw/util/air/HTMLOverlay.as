@@ -36,12 +36,6 @@ package net.tw.util.air {
 			if (e) ph.removeEventListener(Event.ADDED_TO_STAGE, setupListeners);
 			//
 			phnw=ph.stage.nativeWindow;
-			phnw.addEventListener(NativeWindowBoundsEvent.MOVE, updatePositionAndSizeAfterParentIsPositioned);
-			phnw.addEventListener(NativeWindowBoundsEvent.RESIZE, updatePositionAndSizeAfterParentIsPositioned);
-			ph.addEventListener(ResizeEvent.RESIZE, updatePositionAndSize);
-			phnw.addEventListener(Event.CLOSING, beforeClose);
-			ph.addEventListener(Event.REMOVED, stopEvents);
-			phnw.addEventListener(NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGING, onDSChange);
 			//
 			var nwio:NativeWindowInitOptions=new NativeWindowInitOptions();
 			nwio.minimizable = true;
@@ -51,30 +45,45 @@ package net.tw.util.air {
 			if( explicitHeight != 0 ) { p.height; }
 			if( explicitWidth != 0 ) { p.width; }
 			pw=p.stage.nativeWindow;
+			subscribeCloseSyncEvents(pw, phnw);
+			syncWith(ph);
+			//
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+		private function subscribeCloseSyncEvents(pw:NativeWindow, phnw:NativeWindow):void
+		{
+			phnw.addEventListener(Event.CLOSING, beforeClose);
 			pw.addEventListener(Event.CLOSING, beforeClose);
+		}
+		private function subscribeVisualSyncEvents(pw:NativeWindow, phnw:NativeWindow, ph:Sprite):void
+		{
+			phnw.addEventListener(NativeWindowBoundsEvent.MOVE, updatePositionAndSizeAfterParentIsPositioned);
+			phnw.addEventListener(NativeWindowBoundsEvent.RESIZE, updatePositionAndSizeAfterParentIsPositioned);
+			ph.addEventListener(ResizeEvent.RESIZE, updatePositionAndSize);
+			ph.addEventListener(Event.REMOVED, removeVisualSyncEventsAndHide);
+			phnw.addEventListener(NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGING, onDSChange);
 			pw.addEventListener(Event.DEACTIVATE, keepWindowOnTop );
 			phnw.addEventListener(Event.DEACTIVATE, keepWindowOnTop );
 			pw.addEventListener(Event.ACTIVATE, keepWindowOnTop );
 			phnw.addEventListener(Event.ACTIVATE, keepWindowOnTop );
-			//
-			pw.activate();
-			updatePositionAndSizeAfterParentIsPositioned();
-			//
-			dispatchEvent(new Event(Event.COMPLETE));
 		}
-		private function stopEvents(e:Event) : void
+		private function removeVisualSyncEventsAndHide(e:Event=null, hideWithDelay:Boolean=true) : void
 		{
 			phnw.removeEventListener(NativeWindowBoundsEvent.MOVE, updatePositionAndSizeAfterParentIsPositioned);
 			phnw.removeEventListener(NativeWindowBoundsEvent.RESIZE, updatePositionAndSizeAfterParentIsPositioned);
 			ph.removeEventListener(ResizeEvent.RESIZE, updatePositionAndSize);
-			phnw.removeEventListener(Event.CLOSING, beforeClose);
-			ph.removeEventListener(Event.REMOVED, stopEvents);
+			ph.removeEventListener(Event.REMOVED, removeVisualSyncEventsAndHide);
 			phnw.removeEventListener(NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGING, onDSChange);
 			pw.removeEventListener(Event.DEACTIVATE, keepWindowOnTop );
 			phnw.removeEventListener(Event.DEACTIVATE, keepWindowOnTop );
 			pw.removeEventListener(Event.ACTIVATE, keepWindowOnTop );
 			phnw.removeEventListener(Event.ACTIVATE, keepWindowOnTop );
-			pw.close();
+			var hide:Function = function():void{ pw.visible = false; };
+			if( hideWithDelay == true ) {
+				setTimeout( hide, 10 );
+			} else {
+				hide();
+			}
 		}
 		protected function keepWindowOnTop(e:Event):void {
 			var applicationIsActive:Boolean = pw.active || phnw.active;
@@ -84,7 +93,7 @@ package net.tw.util.air {
 			}			
 		}
 		protected function beforeClose(e:Event):void {
-			stopEvents(e);
+			removeVisualSyncEventsAndHide(e, false);
 			e.preventDefault();
 			pw.close();
 			phnw.close();
@@ -139,6 +148,16 @@ package net.tw.util.air {
 		public function refreshOverlaySize():void {
 			pw.width=width;
 			pw.height=height;
+		}
+		public function syncWith(ph:Sprite):void{
+			this.ph = ph;
+			subscribeVisualSyncEvents(pw,phnw, ph);
+			//
+			pw.activate();
+			updatePositionAndSizeAfterParentIsPositioned();
+		}
+		public function stopSync():void{
+			removeVisualSyncEventsAndHide();
 		}
 		//
 		public function get htmlLoader():HTMLLoader {
