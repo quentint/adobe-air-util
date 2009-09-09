@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>adobeairutil</name>
+	<comment></comment>
+	<projects>
+		<project>as3corelib</project>
+		<project>as3flickrlib</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.adobe.flexbuilder.project.flexbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.adobe.flexbuilder.project.flexlibnature</nature>
+		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>[source path] as3Path</name>
+			<type>2</type>
+			<locationURI>as%33Path</locationURI>
+		</link>
+	</linkedResources>
+</projectDescription>
