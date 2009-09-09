@@ -33,7 +33,6 @@ package net.tw.util.air {
 			if (autoStoreOnExit) store();
 		}
 		public function manage(o:Object, prop:String=null):void {
-			if (prop=='toolTip') trace('manage', o, prop);
 			objects.push({target:o, prop:prop});
 			// On gère un conflit éventuel...
 			for (var i:uint=0; i<vars.length; i++) {
@@ -41,7 +40,6 @@ package net.tw.util.air {
 			}
 		}
 		public function storeVar(uniqueIdentifer:String, val:*):void {
-			trace('storeVar', uniqueIdentifer, val);
 			vars.push({id:uniqueIdentifer, v:val});
 		}
 		public function hasVar(uniqueIdentifier:String):Boolean {
@@ -70,7 +68,6 @@ package net.tw.util.air {
 			var prefs:Object=new Object();
 			for each (var o:Object in objects) {
 				var tg:Object=o.target;
-				//trace(tg);
 				var prop:String=o.prop as String;
 				if (prop==null) {
 					var className:String = describeType(tg).@name.toString();
@@ -96,7 +93,6 @@ package net.tw.util.air {
 					}
 				}
 				if (prop!=null) {
-					if (prop=='toolTip') trace('store', tg, prop, tg[prop]);
 					var pair:Object=prefs[tg.id] ? prefs[tg.id] : {};
 					pair[prop]=tg[prop];
 					prefs[tg.id]=pair;
@@ -104,10 +100,6 @@ package net.tw.util.air {
 			}
 			for each (o in vars) {
 				prefs[o.id]=o.v;
-				trace('var', o.id);
-				for each(var s:String in o.v) {
-					trace(' - ', s, o.v[s]);
-				}
 			}
 			var bytes:ByteArray=new ByteArray();
 			bytes.writeObject(prefs);
@@ -122,7 +114,6 @@ package net.tw.util.air {
 					var props:Object=prefs[object.id];
 					for (var p:String in props) {
 						object[p]=props[p];
-						if (p=='toolTip') trace('load', object, p, props[p]);
 					}
 				}
 			}
