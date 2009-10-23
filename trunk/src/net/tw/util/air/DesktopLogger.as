@@ -13,6 +13,7 @@ package net.tw.util.air {
 				str+=Object(rest[i]).toString();
 				if (i<rest.length-1) str+=', ';
 			}
+			trace(str);
 			str+='\n';
 			s.writeUTFBytes(str);
 			s.close();
