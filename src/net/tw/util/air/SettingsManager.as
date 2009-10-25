@@ -11,6 +11,7 @@ package net.tw.util.air {
 		protected var objects:Array;
 		protected var vars:Array;
 		public var autoStoreOnExit:Boolean=true;
+		public var autoStoreVars:Boolean=false;
 		//
 		public function SettingsManager(name:String="settings", a:Array=null) {
 			itemName=name;
@@ -29,6 +30,7 @@ package net.tw.util.air {
 			}
 		}
 		private function onExit(e:Event):void {
+			//trace('onExit');
 			dispatchEvent(new Event("store"));
 			if (autoStoreOnExit) store();
 		}
@@ -41,6 +43,7 @@ package net.tw.util.air {
 		}
 		public function storeVar(uniqueIdentifer:String, val:*):void {
 			vars.push({id:uniqueIdentifer, v:val});
+			if (autoStoreVars) store();
 		}
 		public function hasVar(uniqueIdentifier:String):Boolean {
 			var prefs:Object=getPrefs();
@@ -51,6 +54,7 @@ package net.tw.util.air {
 				var o:Object=vars[i];
 				if (o.id==uniqueIdentifer) {
 					vars.splice(i, 1);
+					if (autoStoreVars) store();
 					return;
 				}
 			}
@@ -64,6 +68,7 @@ package net.tw.util.air {
 			return prefs[uniqueIdentifier] ? prefs[uniqueIdentifier] : null;
 		}
 		public function store():void {
+			//trace('store');
 			EncryptedLocalStore.removeItem(itemName);
 			var prefs:Object=new Object();
 			for each (var o:Object in objects) {
@@ -83,6 +88,7 @@ package net.tw.util.air {
 							break;
 						case 'mx.controls::TextArea':
 						case 'mx.controls::TextInput':
+						case 'flexlib.controls::PromptingTextInput':
 							prop='text';
 							break;
 						case 'mx.controls::ComboBox':
