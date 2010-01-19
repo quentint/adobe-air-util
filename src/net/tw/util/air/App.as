@@ -3,6 +3,7 @@ package net.tw.util.air {
 	import flash.display.NativeWindow;
 	import flash.display.Screen;
 	import flash.events.Event;
+	import flash.filesystem.File;
 	import flash.system.Capabilities;
 	
 	import mx.core.IWindow;
@@ -47,6 +48,11 @@ package net.tw.util.air {
 				w.visible=false;
 				if (activateOnHide) activateOnHide.activate();
 			});
+		}
+		//
+		public static function getAppSchemeURL(f:File):String {
+			var absAppDir:File=new File(File.applicationDirectory.nativePath);
+			return File.applicationDirectory.resolvePath(absAppDir.getRelativePath(f)).url;
 		}
 	}
 }
