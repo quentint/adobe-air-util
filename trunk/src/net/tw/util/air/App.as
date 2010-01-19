@@ -5,7 +5,6 @@ package net.tw.util.air {
 	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.system.Capabilities;
-	
 	import mx.core.IWindow;
 	//
 	public class App {
@@ -37,6 +36,10 @@ package net.tw.util.air {
 		public static function fixLoadURL(fileURL:String):String {
 			return ((App.runningOnLinux() || App.runningOnMac()) && fileURL.substr(0, 7)!='file://') ? 'file://'+fileURL : fileURL;
 		}
+		public static function getAppSchemeURL(f:File):String {
+			var absAppDir:File=new File(File.applicationDirectory.nativePath);
+			return File.applicationDirectory.resolvePath(absAppDir.getRelativePath(f)).url;
+		}
 		//
 		public static function centerWindow(w:IWindow):void {
 			w.nativeWindow.x=(Screen.mainScreen.bounds.width-w.nativeWindow.width)/2;
@@ -48,11 +51,6 @@ package net.tw.util.air {
 				w.visible=false;
 				if (activateOnHide) activateOnHide.activate();
 			});
-		}
-		//
-		public static function getAppSchemeURL(f:File):String {
-			var absAppDir:File=new File(File.applicationDirectory.nativePath);
-			return File.applicationDirectory.resolvePath(absAppDir.getRelativePath(f)).url;
 		}
 	}
 }
