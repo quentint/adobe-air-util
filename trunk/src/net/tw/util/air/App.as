@@ -5,7 +5,8 @@ package net.tw.util.air {
 	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.system.Capabilities;
-	import mx.core.IWindow;
+	
+	import mx.core.Window;
 	//
 	public class App {
 		public function App() {}
@@ -41,9 +42,14 @@ package net.tw.util.air {
 			return File.applicationDirectory.resolvePath(absAppDir.getRelativePath(f)).url;
 		}
 		//
-		public static function centerWindow(w:IWindow):void {
-			w.nativeWindow.x=(Screen.mainScreen.bounds.width-w.nativeWindow.width)/2;
-			w.nativeWindow.y=(Screen.mainScreen.bounds.height-w.nativeWindow.height)/2;
+		public static function centerWindow(w:*):void {
+			if (!(w is NativeWindow) && !(w is Window)) {
+				throw(new ArgumentError());
+				return;
+			}
+			var o:*=w is NativeWindow ? w : w.nativeWindow;
+			o.x=(Screen.mainScreen.bounds.width-o.width)/2;
+			o.y=(Screen.mainScreen.bounds.height-o.height)/2;
 		}
 		public static function preventClose(w:NativeWindow, activateOnHide:NativeWindow=null):void {
 			w.addEventListener(Event.CLOSING, function(e:Event):void {
